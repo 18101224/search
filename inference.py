@@ -27,7 +27,7 @@ if __name__ == '__main__':
     x = 'input_wav_path'
     wav_paths = db.get_k_sims(x)
     ids = get_names(wav_paths)
-
+    print(ids)
 
 
 
