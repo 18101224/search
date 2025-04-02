@@ -64,7 +64,8 @@ class NNDB:
         self.audio_dir = audio_dir
         self.model = get_basic_model(mode='embed_only')
         self.model.eval()
-        self.model = self.model.to('cuda')
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.model = self.model.to(self.device)
         self.weights = weights
 
         if weights is not None and os.path.exists(weights):
@@ -98,9 +99,10 @@ class NNDB:
         torch.save(embeddings,f'{self.weights}/tensor.pt')
         return embeddings , return_paths
 
+    @torch.no_grad()
     def get_k_sims(self,x,k=10):
         y, sr = librosa.load(x,sr=32000,duration=5)
-        x = self.model(torch.from_numpy(y).to('cuda').unsqueeze(0)).squeeze(0)
+        x = self.model(torch.from_numpy(y).to(self.device).unsqueeze(0)).squeeze(0)
         value, idxs = get_dist(self.tensor,x)
         paths = []
         values = []
