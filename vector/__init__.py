@@ -69,7 +69,7 @@ class NNDB:
         self.weights = weights
 
         if weights is not None and os.path.exists(weights):
-            self.tensor = torch.load(f'{weights}/tensor.pt')
+            self.tensor = torch.load(f'{weights}/tensor.pt',map_location=self.device)
             self.paths = pickle.load(open(f'{weights}/paths.pkl','rb'))
         else:
             if not os.path.exists(weights):
