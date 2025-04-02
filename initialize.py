@@ -1,22 +1,24 @@
-from vector import compute_fft_descriptors
-from glob import glob
+from vector import VanlillaDB, NNDB
 from argparse import ArgumentParser
-import pickle, torch
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument("--path", type=str)
-    return parser.parse_args()
+    parser.add_argument('--db_dir', type=str)
+    parser.add_argument('--weights', type=str) 
+    parser.add_argument('--method', choices=['all''fft','mfcc','passot'])
+    args = parser.parse_args()
+    return args
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     args = get_args()
-    root = args.path
-    paths = sorted(glob(f"{root}/*.wav"))
-    results = []
-    for path in paths:
-        z = compute_fft_descriptors(path)
-        results.append(z)
-    results = torch.stack(results)
-    torch.save(results,"weight.pt")
-    with open('paths.pkl','wb') as f:
-        pickle.dump(paths,f)
+    if args.method == 'all':
+         VanlillaDB(args.db_dir,weights=f'{args.db_dir}_fft')
+         VanlillaDB(args.db_dir,weights=f'{args.db_dir}_mfcc')
+         NNDB(args.db_dir,weights=f'{args.db_dir}_passot')
+    elif args.method == 'fft':
+        VanlillaDB(args.db_dir,weights=f'{args.db_dir}_fft')
+    elif args.method == 'mfcc':
+        VanlillaDB(args.db_dir,weights=f'{args.db_dir}_mfcc')
+    elif args.method == 'passot':
+        NNDB(args.db_dir,weights=f'{args.db_dir}_passot')
+

@@ -1,25 +1,41 @@
+from vector import VanlillaDB, NNDB
+from glob import glob
+import shutil, os
+from tqdm import tqdm
+from vector.utils import check_dist
 from argparse import ArgumentParser
-import torch, pickle
-import numpy as np
-from vector import compute_fft_descriptors
 
-def get_args():
-    args = ArgumentParser()
-    args.add_argument('--path')
-    args = args.parse_args()
-    return args
-
-def get_10(path, weight, paths):
-    z = compute_fft_descriptors(path).reshape(1, 7)
-    dist = torch.tensor(torch.sum(np.abs(weight - z), dim=1)).reshape(-1)
-    _, idx = torch.sort(dist, dim=0)
+def get_names(paths):
     results = []
-    for i in range(10):
-        results.append(paths[idx[i]])
+    for path in paths:
+        name = path.split('/')[-1].split('.')[0]
+        results.append(name)
     return results
 
-if __name__ == "__main__":
-    weight = torch.load("weight.pt")
-    paths = pickle.load(open("paths.pkl","rb"))
-    path = get_args().path
-    print(get_10(path,weight,paths))
+def get_args():
+    parser = ArgumentParser()
+    parser.add_argument('--query_dir', type=str, help='Directory containing query wav files')
+    parser.add_argument('--method', type=str, choices=['fft','mfcc','passot'])
+    parser.add_argument('--weights', type=str)
+    args = parser.parse_args()
+    return args
+
+
+if __name__ == '__main__':
+    db = NNDB('./wavs',weights='200k_clean_passot')
+
+    x = 'input_wav_path'
+    wav_paths = db.get_k_sims(x)
+    ids = get_names(wav_paths)
+
+
+
+
+#
+# if __name__ == '__main__':
+#     args = get_args()
+#     if args.method in ['fft','mfcc']:
+#         db = VanlillaDB('./wavs',weights=args.weights, method=args.method)
+#     else:
+#         db = NNDB('./wavs',weights=args.weights)
+#
