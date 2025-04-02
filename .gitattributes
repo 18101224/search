@@ -1,0 +1,2 @@
+200k_clean_passot/paths.pkl filter=lfs diff=lfs merge=lfs -text
+200k_clean_passot/tensor.pt filter=lfs diff=lfs merge=lfs -text
