@@ -1,6 +1,6 @@
-from vector import VanlillaDB, NNDB
+from vector import VanlillaDB, NNDB, hierarchical_search
 from glob import glob
-import shutil, os
+import shutil, os, pickle
 from tqdm import tqdm
 from vector.utils import check_dist
 from argparse import ArgumentParser
@@ -22,13 +22,18 @@ def get_args():
 
 
 if __name__ == '__main__':
-    db = NNDB('./wavs',weights='200k_clean_passot')
 
-    x = 'input_wav_path'
-    wav_paths = db.get_k_sims(x)
-    ids = get_names(wav_paths)
-    print(ids)
 
+    nndb = NNDB('./wavs',weights='200koneshot_passt')
+    name = 'ts'
+    # nndb = NNDB('./wavs', weights='20koneshot_passt')
+    # spdb = VanlillaDB('./wavs', weights='20koneshot_fft')
+    # result = hierarchical_search(nndb,spdb,f'lp/{name}.wav')
+    result, _ = nndb.get_k_sims(f'lp/{name}.wav')
+    paths = get_names(result)
+    with open(f'{name}.pkl','wb') as f :
+        pickle.dump(paths,f)
+    print(paths)
 
 
 #

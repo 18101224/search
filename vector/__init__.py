@@ -16,6 +16,7 @@ class VanlillaDB:
         self.audio_dir = audio_dir
         self.weight_path = weights
         self.func = compute_fft_descriptors if method == 'fft' else compute_enhanced_descriptors
+
         if weights is not None and os.path.exists(weights):
             self.paths, self.vecs, self.mean, self.std = load_weight(weights)
         else:
@@ -47,6 +48,23 @@ class VanlillaDB:
         print(f'entire : {entire} , fail : {fail}')
         return paths, vecs, mean, std
 
+    def sort(self,paths,x):
+        indices = []
+        for path in paths:
+            try :
+                idx = self.paths.index(path)
+                indices.append(idx)
+            except:
+                continue
+        vecs = self.vecs[indices]
+        x = (self.func(x)-self.std)/(self.mean-self.std)
+        value, idxs = get_dist(vecs,x)
+        result = []
+        for idx in idxs:
+            result.append(self.paths[indices[idx]])
+        return result
+
+
     def get_k_sims(self,x,k=10):
         x = (self.func(x) - self.std) / (self.mean - self.std)
         value, idxs = get_dist(self.vecs,x)
@@ -56,6 +74,8 @@ class VanlillaDB:
             paths.append(self.paths[idxs[i]])
             values.append(value[i])
         return paths, values
+
+
 
 
 
@@ -110,3 +130,19 @@ class NNDB:
             paths.append(self.paths[idxs[i]])
             values.append(value[i])
         return paths, values
+
+
+def hierarchical_search(nndb,spdb,x):
+    paths, values = nndb.get_k_sims(x,k=100)
+    result = spdb.sort(paths,x)
+    k = min(len(result),10)
+    return result[:k]
+
+
+
+# class AttackDB:
+#     def __init__(self, audio_dir, weight_dir):
+#         self.audio_dir = audio_dir
+#         self.weight_dir = weight_dir
+#         self.weight = pickle.load(open(f'{weight_dir}/tensor.pt'))
+#         self
